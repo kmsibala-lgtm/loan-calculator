@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <title>Loan Calculator - Monthly Interest Methods</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            padding: 20px;
+            color: #333;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .calculator-container {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            gap: 0;
+        }
+        
+        .input-section {
+            flex: 1 1 320px;
+            min-width: 0;
+            padding: 20px;
+            border-right: 1px solid #eee;
+        }
+        
+        .results-section {
+            flex: 2 1 420px;
+            min-width: 0;
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .input-with-unit {
+            position: relative;
+        }
+        
+        .unit {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+        }
+        
+        .loan-type-selector {
+            display: flex;
+            margin-bottom: 25px;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+        
+        .loan-type {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .loan-type.active {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .loan-type:hover:not(.active) {
+            background-color: #ecf0f1;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #calculateBtn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        #calculateBtn:hover {
+            background-color: #27ae60;
+        }
+        
+        #resetBtn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        #resetBtn:hover {
+            background-color: #c0392b;
+        }
+        
+        #exportBtn {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        #exportBtn:hover {
+            background-color: #2980b9;
+        }
+        
+        .summary-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .summary-card {
+            flex: 1;
+            min-width: 200px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            border-left: 4px solid #3498db;
+        }
+        
+        .summary-card h3 {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        
+        .summary-card p {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .summary-card.fixed {
+            border-left-color: #2ecc71;
+        }
+        
+        .summary-card.diminishing {
+            border-left-color: #e74c3c;
+        }
+        
+        .loan-summary {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .loan-summary h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .summary-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .summary-item .value {
+            font-weight: 600;
+        }
+        
+        .amortization-table {
+            overflow-x: auto;
+            margin-top: 25px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        table {
+            width: 100%;
+            min-width: 640px;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        th {
+            background-color: #2c3e50;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        tr:hover {
+            background-color: #f1f8ff;
+        }
+        
+        .method-explanation {
+            background-color: #f0f7ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .method-explanation h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .method-explanation p {
+            line-height: 1.6;
+            color: #555;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .currency-symbol {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .term-info {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #5d4037;
+        }
+        
+        .term-info p {
+            margin: 5px 0;
+        }
+        
+        /* PDF Preview Modal Styles */
+        .pdf-preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .pdf-preview-content {
+            background-color: white;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .pdf-preview-header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .pdf-preview-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .close-preview {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+        
+        .close-preview:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .pdf-preview-body {
+            padding: 30px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        
+        .pdf-preview-footer {
+            padding: 20px;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .pdf-section {
+            margin-bottom: 30px;
+        }
+        
+        .pdf-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .pdf-loan-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .pdf-detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .pdf-detail-item .label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .pdf-detail-item .value {
+            font-weight: 600;
+            color: #e74c3c;
+        }
+        
+        .pdf-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .pdf-table th {
+            background-color: #2c3e50;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .pdf-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .pdf-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .calculator-container {
+                flex-direction: column;
+                padding: 12px;
+            }
+            
+            .input-section,
+            .results-section {
+                width: 100%;
+                min-width: 0;
+                padding: 14px;
+            }
+
+            .input-section {
+                border-right: none;
+                border-bottom: 1px solid #eee;
+            }
+
+            .summary-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-cards {
+                flex-direction: column;
+            }
+            
+            .summary-card {
+                min-width: 100%;
+            }
+            
+            .pdf-preview-content {
+                width: 95%;
+                height: 95vh;
+            }
+            
+            .pdf-preview-body {
+                padding: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: 8px;
+            }
+            
+            header {
+                padding: 16px 12px;
+            }
+            
+            header h1 {
+                font-size: 20px;
+            }
+
+            header p {
+                font-size: 14px;
+            }
+
+            .calculator-container {
+                padding: 10px;
+            }
+
+            .input-section,
+            .results-section {
+                padding: 10px;
+            }
+
+            .loan-type-selector {
+                flex-direction: column;
+            }
+
+            .loan-type {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            button {
+                width: 100%;
+                min-height: 44px;
+                padding: 12px;
+                font-size: 15px;
+            }
+
+            input,
+            select {
+                font-size: 16px;
+                padding: 11px 12px;
+            }
+
+            .summary-card {
+                padding: 14px;
+            }
+
+            .summary-card p {
+                font-size: 20px;
+            }
+            
+            .pdf-loan-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .pdf-table {
+                font-size: 12px;
+            }
+            
+            .pdf-table th, 
+            .pdf-table td {
+                padding: 8px 6px;
+            }
+
+            table {
+                min-width: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Loan Calculator</h1>
+            <p>Compare 2% Fixed Monthly vs. 3% Diminishing Monthly Methods</p>
+        </header>
+        
+        <div class="calculator-container">
+            <div class="input-section">
+                <div class="loan-type-selector">
+                    <div class="loan-type active" id="fixedMethod">2% Fixed Monthly</div>
+                    <div class="loan-type" id="diminishingMethod">3% Diminishing Monthly</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="loanAmount">Loan Amount (Baht)</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="loanAmount" min="1000" step="1000" value="100000">
+                        <span class="unit">฿</span>
+                    </div>
+                    <div class="term-info" id="amountInfo">
+                        <p>• ≤ 30,000฿: Maximum 6 months term</p>
+                        <p>• &gt; 30,000฿: Maximum 8 months term</p>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="loanTerm">Loan Term (Months)</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="loanTerm" min="1" max="8" step="1" value="6">
+                        <span class="unit">Months</span>
+                    </div>
+                    <div class="term-info" id="termInfo">
+                        <p id="currentTermLimit">Current limit: 8 months maximum</p>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button id="calculateBtn">Calculate Loan</button>
+                    <button id="resetBtn">Reset</button>
+                </div>
+                
+                <div class="method-explanation">
+                    <h3 id="methodTitle">2% Fixed Monthly Interest</h3>
+                    <p id="methodDescription">
+                        Equal principal payments each month (loan amount ÷ months). Interest is calculated at 2% monthly on the original loan amount throughout the entire term.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="results-section">
+                <div class="summary-cards">
+                    <div class="summary-card fixed">
+                        <h3>Monthly Principal</h3>
+                        <p id="monthlyPrincipal"><span class="currency-symbol">฿</span>0.00</p>
+                    </div>
+                    <div class="summary-card diminishing">
+                        <h3>First Month Payment</h3>
+                        <p id="firstMonthPayment"><span class="currency-symbol">฿</span>0.00</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Total Interest Paid</h3>
+                        <p id="totalInterest"><span class="currency-symbol">฿</span>0.00</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Total Payment</h3>
+                        <p id="totalPayment"><span class="currency-symbol">฿</span>0.00</p>
+                    </div>
+                </div>
+                
+                <div class="loan-summary">
+                    <h2>Loan Summary - <span id="summaryMethod">2% Fixed Monthly</span></h2>
+                    <div class="summary-details">
+                        <div class="summary-item">
+                            <span class="label">Loan Amount:</span>
+                            <span class="value" id="summaryLoanAmount"><span class="currency-symbol">฿</span>0.00</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Monthly Interest Rate:</span>
+                            <span class="value" id="summaryInterestRate">0%</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Loan Term:</span>
+                            <span class="value" id="summaryLoanTerm">0 months</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Monthly Principal:</span>
+                            <span class="value" id="summaryMonthlyPrincipal"><span class="currency-symbol">฿</span>0.00</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">First Month Payment:</span>
+                            <span class="value" id="summaryFirstMonthPayment"><span class="currency-symbol">฿</span>0.00</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Total Interest:</span>
+                            <span class="value" id="summaryTotalInterest"><span class="currency-symbol">฿</span>0.00</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Total Payment:</span>
+                            <span class="value" id="summaryTotalPayment"><span class="currency-symbol">฿</span>0.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="amortization-table">
+                    <h3>Payment Schedule</h3>
+                    <div id="tableContainer">
+                        <table id="amortizationTable">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th>Beginning Balance</th>
+                                    <th>Payment</th>
+                                    <th>Principal</th>
+                                    <th>Interest</th>
+                                    <th>Ending Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody id="amortizationBody">
+                                <!-- Payment schedule rows will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="button-group" style="margin-top: 20px;">
+                    <button id="exportBtn">Print / Save as PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if ('serviceWorker' in navigator && window.isSecureContext) {
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
+            }
+
+            // DOM Elements
+            const loanAmountInput = document.getElementById('loanAmount');
+            const loanTermInput = document.getElementById('loanTerm');
+            const fixedMethodBtn = document.getElementById('fixedMethod');
+            const diminishingMethodBtn = document.getElementById('diminishingMethod');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const exportBtn = document.getElementById('exportBtn');
+            const methodTitle = document.getElementById('methodTitle');
+            const methodDescription = document.getElementById('methodDescription');
+            const summaryMethod = document.getElementById('summaryMethod');
+            const currentTermLimit = document.getElementById('currentTermLimit');
+            
+            // Results elements
+            const monthlyPrincipal = document.getElementById('monthlyPrincipal');
+            const firstMonthPayment = document.getElementById('firstMonthPayment');
+            const totalInterest = document.getElementById('totalInterest');
+            const totalPayment = document.getElementById('totalPayment');
+            
+            // Summary elements
+            const summaryLoanAmount = document.getElementById('summaryLoanAmount');
+            const summaryInterestRate = document.getElementById('summaryInterestRate');
+            const summaryLoanTerm = document.getElementById('summaryLoanTerm');
+            const summaryMonthlyPrincipal = document.getElementById('summaryMonthlyPrincipal');
+            const summaryFirstMonthPayment = document.getElementById('summaryFirstMonthPayment');
+            const summaryTotalInterest = document.getElementById('summaryTotalInterest');
+            const summaryTotalPayment = document.getElementById('summaryTotalPayment');
+            
+            // Amortization table
+            const amortizationBody = document.getElementById('amortizationBody');
+            
+            // Current selected method
+            let currentMethod = 'fixed';
+            let currentSchedule = [];
+            let currentLoanDetails = {};
+            
+            // Event Listeners
+            fixedMethodBtn.addEventListener('click', () => selectMethod('fixed'));
+            diminishingMethodBtn.addEventListener('click', () => selectMethod('diminishing'));
+            calculateBtn.addEventListener('click', calculateLoan);
+            resetBtn.addEventListener('click', resetCalculator);
+            exportBtn.addEventListener('click', printOrSavePdf);
+            loanAmountInput.addEventListener('input', updateTermLimit);
+            loanTermInput.addEventListener('input', validateTerm);
+            
+            // Initialize calculator
+            selectMethod('fixed');
+            updateTermLimit();
+            calculateLoan();
+            
+            // Function to update loan term limit based on loan amount
+            function updateTermLimit() {
+                const loanAmount = parseFloat(loanAmountInput.value) || 0;
+                const currentTerm = parseInt(loanTermInput.value) || 1;
+                
+                let maxTerm;
+                let termInfo;
+                
+                if (loanAmount <= 30000) {
+                    maxTerm = 6;
+                    termInfo = "Current limit: 6 months maximum (for loans ≤ 30,000฿)";
+                } else {
+                    maxTerm = 8;
+                    termInfo = "Current limit: 8 months maximum (for loans > 30,000฿)";
+                }
+                
+                // Update the input max attribute
+                loanTermInput.max = maxTerm;
+                
+                // Update the displayed info
+                currentTermLimit.textContent = termInfo;
+                
+                // If current term exceeds new max, adjust it
+                if (currentTerm > maxTerm) {
+                    loanTermInput.value = maxTerm;
+                }
+                
+                // Validate the current term
+                validateTerm();
+            }
+            
+            // Function to validate loan term
+            function validateTerm() {
+                const loanAmount = parseFloat(loanAmountInput.value) || 0;
+                const currentTerm = parseInt(loanTermInput.value) || 1;
+                
+                let maxTerm = loanAmount <= 30000 ? 6 : 8;
+                
+                if (currentTerm > maxTerm) {
+                    loanTermInput.value = maxTerm;
+                    alert(`Maximum loan term for ${loanAmount.toLocaleString()}฿ is ${maxTerm} months`);
+                }
+                
+                if (currentTerm < 1) {
+                    loanTermInput.value = 1;
+                }
+            }
+            
+            // Function to select loan method
+            function selectMethod(method) {
+                currentMethod = method;
+                
+                // Update UI for selected method
+                if (method === 'fixed') {
+                    fixedMethodBtn.classList.add('active');
+                    diminishingMethodBtn.classList.remove('active');
+                    methodTitle.textContent = '2% Fixed Monthly Interest';
+                    methodDescription.textContent = 'Equal principal payments each month (loan amount ÷ months). Interest is calculated at 2% monthly on the original loan amount throughout the entire term.';
+                    summaryMethod.textContent = '2% Fixed Monthly';
+                } else {
+                    fixedMethodBtn.classList.remove('active');
+                    diminishingMethodBtn.classList.add('active');
+                    methodTitle.textContent = '3% Diminishing Monthly Interest';
+                    methodDescription.textContent = 'Equal principal payments each month (loan amount ÷ months). Interest is calculated at 3% monthly on the remaining balance each month, decreasing as the principal is paid down.';
+                    summaryMethod.textContent = '3% Diminishing Monthly';
+                }
+                
+                calculateLoan();
+            }
+            
+            // Function to calculate loan
+            function calculateLoan() {
+                // Get input values
+                const loanAmount = parseFloat(loanAmountInput.value) || 0;
+                const loanTerm = parseInt(loanTermInput.value) || 0;
+                
+                if (loanAmount <= 0 || loanTerm <= 0) {
+                    alert('Please enter valid loan amount and term');
+                    return;
+                }
+                
+                // Validate term limit
+                validateTerm();
+                
+                // Calculate both methods for comparison
+                const fixedResult = calculateFixedMonthly(loanAmount, loanTerm);
+                const diminishingResult = calculateDiminishingMonthly(loanAmount, loanTerm);
+                
+                // Update comparison cards
+                const result = currentMethod === 'fixed' ? fixedResult : diminishingResult;
+                
+                monthlyPrincipal.innerHTML = `<span class="currency-symbol">฿</span>${formatNumber(result.monthlyPrincipal)}`;
+                firstMonthPayment.innerHTML = `<span class="currency-symbol">฿</span>${formatNumber(result.firstMonthPayment)}`;
+                totalInterest.innerHTML = `<span class="currency-symbol">฿</span>${formatNumber(result.totalInterest)}`;
+                totalPayment.innerHTML = `<span class="currency-symbol">฿</span>${formatNumber(result.totalPayment)}`;
+                
+                // Update summary based on selected method
+                summaryLoanAmount.innerHTML = `<span class="currency-symbol">฿</span>${formatNumber(loanAmount)}`;
+                summaryInterestRate.textContent = currentMethod === 'fixed' ? '2% monthly' : '3% monthly';
+                summaryLoanTerm.textContent = `${loanTerm} months`;
+                summaryMonthlyPrincipal.innerHTML = `<span class="currency-symbol">฿</span>${formatNumber(result.monthlyPrincipal)}`;
+                summaryFirstMonthPayment.innerHTML = `<span class="currency-symbol">฿</span>${formatNumber(result.firstMonthPayment)}`;
+                summaryTotalInterest.innerHTML = `<span class="currency-symbol">฿</span>${formatNumber(result.totalInterest)}`;
+                summaryTotalPayment.innerHTML = `<span class="currency-symbol">฿</span>${formatNumber(result.totalPayment)}`;
+                
+                // Store current schedule for PDF export
+                currentSchedule = result.schedule;
+                currentLoanDetails = {
+                    amount: loanAmount,
+                    term: loanTerm,
+                    method: currentMethod === 'fixed' ? '2% Fixed Monthly' : '3% Diminishing Monthly',
+                    monthlyPrincipal: result.monthlyPrincipal,
+                    firstMonthPayment: result.firstMonthPayment,
+                    totalInterest: result.totalInterest,
+                    totalPayment: result.totalPayment
+                };
+                
+                // Generate payment schedule
+                generatePaymentSchedule(result.schedule);
+            }
+            
+            // Function to calculate fixed monthly interest method (2%)
+            function calculateFixedMonthly(loanAmount, months) {
+                // Equal principal payments
+                const monthlyPrincipal = loanAmount / months;
+                // Fixed interest rate (2% monthly)
+                const monthlyInterestRate = 0.02;
+                // Monthly interest amount (fixed on original principal)
+                const monthlyInterest = loanAmount * monthlyInterestRate;
+                // First month payment (principal + interest)
+                const firstMonthPayment = monthlyPrincipal + monthlyInterest;
+                // Total interest
+                const totalInterest = monthlyInterest * months;
+                // Total payment
+                const totalPayment = loanAmount + totalInterest;
+                
+                // Generate schedule
+                const schedule = [];
+                let beginningBalance = loanAmount;
+                
+                for (let month = 1; month <= months; month++) {
+                    const interest = loanAmount * monthlyInterestRate; // Fixed on original amount
+                    const principal = monthlyPrincipal;
+                    const payment = principal + interest;
+                    const endingBalance = beginningBalance - principal;
+                    
+                    schedule.push({
+                        month: month,
+                        beginningBalance: beginningBalance,
+                        payment: payment,
+                        principal: principal,
+                        interest: interest,
+                        endingBalance: endingBalance > 0 ? endingBalance : 0
+                    });
+                    
+                    beginningBalance = endingBalance;
+                }
+                
+                return {
+                    monthlyPrincipal: monthlyPrincipal,
+                    firstMonthPayment: firstMonthPayment,
+                    totalInterest: totalInterest,
+                    totalPayment: totalPayment,
+                    schedule: schedule
+                };
+            }
+            
+            // Function to calculate diminishing balance method (3% monthly)
+            function calculateDiminishingMonthly(loanAmount, months) {
+                // Equal principal payments
+                const monthlyPrincipal = loanAmount / months;
+                // Diminishing interest rate (3% monthly)
+                const monthlyInterestRate = 0.03;
+                
+                // Generate schedule and calculate totals
+                const schedule = [];
+                let beginningBalance = loanAmount;
+                let totalInterest = 0;
+                
+                for (let month = 1; month <= months; month++) {
+                    const interest = beginningBalance * monthlyInterestRate; // On remaining balance
+                    const principal = monthlyPrincipal;
+                    const payment = principal + interest;
+                    const endingBalance = beginningBalance - principal;
+                    totalInterest += interest;
+                    
+                    schedule.push({
+                        month: month,
+                        beginningBalance: beginningBalance,
+                        payment: payment,
+                        principal: principal,
+                        interest: interest,
+                        endingBalance: endingBalance > 0 ? endingBalance : 0
+                    });
+                    
+                    beginningBalance = endingBalance;
+                }
+                
+                // First month payment
+                const firstMonthPayment = (loanAmount / months) + (loanAmount * monthlyInterestRate);
+                
+                return {
+                    monthlyPrincipal: monthlyPrincipal,
+                    firstMonthPayment: firstMonthPayment,
+                    totalInterest: totalInterest,
+                    totalPayment: loanAmount + totalInterest,
+                    schedule: schedule
+                };
+            }
+            
+            // Function to generate payment schedule table (changed from amortization)
+            function generatePaymentSchedule(schedule) {
+                amortizationBody.innerHTML = '';
+                
+                schedule.forEach(row => {
+                    const tr = document.createElement('tr');
+                    
+                    tr.innerHTML = `
+                        <td>${row.month}</td>
+                        <td>฿${formatNumber(row.beginningBalance)}</td>
+                        <td>฿${formatNumber(row.payment)}</td>
+                        <td>฿${formatNumber(row.principal)}</td>
+                        <td>฿${formatNumber(row.interest)}</td>
+                        <td>฿${formatNumber(row.endingBalance)}</td>
+                    `;
+                    
+                    amortizationBody.appendChild(tr);
+                });
+            }
+            
+            // Function to format numbers with Thai Baht formatting
+            function formatNumber(amount) {
+                return amount.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+            
+            // Function to reset calculator
+            function resetCalculator() {
+                loanAmountInput.value = 100000;
+                loanTermInput.value = 6;
+                updateTermLimit();
+                selectMethod('fixed');
+                calculateLoan();
+            }
+            
+            // Function to print report or save as PDF (offline)
+            function printOrSavePdf() {
+                const currentDate = new Date();
+                const formattedDate = currentDate.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                const tableRows = currentSchedule.map(row => `
+                    <tr>
+                        <td>${row.month}</td>
+                        <td>฿${formatNumber(row.beginningBalance)}</td>
+                        <td>฿${formatNumber(row.payment)}</td>
+                        <td>฿${formatNumber(row.principal)}</td>
+                        <td>฿${formatNumber(row.interest)}</td>
+                        <td>฿${formatNumber(row.endingBalance)}</td>
+                    </tr>
+                `).join('');
+
+                const reportHtml = `
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Loan Calculator Report</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; color: #1f2937; padding: 24px; }
+                            h1 { margin: 0 0 8px; font-size: 24px; }
+                            p { margin: 4px 0; }
+                            .section { margin-top: 20px; }
+                            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
+                            .label { font-weight: 700; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+                            th, td { border: 1px solid #d1d5db; padding: 8px; font-size: 12px; text-align: left; }
+                            th { background: #f3f4f6; }
+                            @media print { body { padding: 8px; } }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>Loan Calculator Report</h1>
+                        <p>Generated on: ${formattedDate}</p>
+
+                        <div class="section">
+                            <h3>Loan Details</h3>
+                            <div class="grid">
+                                <p><span class="label">Loan Amount:</span> ฿${formatNumber(currentLoanDetails.amount)}</p>
+                                <p><span class="label">Calculation Method:</span> ${currentLoanDetails.method}</p>
+                                <p><span class="label">Loan Term:</span> ${currentLoanDetails.term} months</p>
+                                <p><span class="label">Monthly Principal:</span> ฿${formatNumber(currentLoanDetails.monthlyPrincipal)}</p>
+                                <p><span class="label">First Month Payment:</span> ฿${formatNumber(currentLoanDetails.firstMonthPayment)}</p>
+                                <p><span class="label">Total Interest:</span> ฿${formatNumber(currentLoanDetails.totalInterest)}</p>
+                                <p><span class="label">Total Payment:</span> ฿${formatNumber(currentLoanDetails.totalPayment)}</p>
+                                <p><span class="label">Term Limit:</span> ${currentLoanDetails.amount <= 30000 ? '6 months maximum (≤ 30,000฿)' : '8 months maximum (> 30,000฿)'}</p>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h3>Payment Schedule</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Month</th>
+                                        <th>Beginning Balance</th>
+                                        <th>Payment</th>
+                                        <th>Principal</th>
+                                        <th>Interest</th>
+                                        <th>Ending Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </body>
+                    </html>
+                `;
+
+                const reportWindow = window.open('', '_blank');
+                if (!reportWindow) {
+                    alert('Please allow pop-ups for this page to print or save as PDF.');
+                    return;
+                }
+
+                reportWindow.document.open();
+                reportWindow.document.write(reportHtml);
+                reportWindow.document.close();
+
+                setTimeout(() => {
+                    reportWindow.focus();
+                    reportWindow.print();
+                }, 300);
+            }
+        });
+    </script>
+</body>
+</html>
